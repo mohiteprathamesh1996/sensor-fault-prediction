@@ -1,0 +1,16 @@
+pymongo[srv]==4.2.0
+pandas
+certifi
+datetime
+scikit-learn
+seaborn
+typing
+scipy
+imblearn
+PyYAML
+xgboost
+pytest-shutil
+shutils
+dill
+fastapi
+uvicorn

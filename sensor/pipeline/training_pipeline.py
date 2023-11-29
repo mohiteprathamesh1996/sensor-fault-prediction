@@ -4,7 +4,8 @@ from sensor.entity.config_entity import (
     DataValidationConfig,
     DataTransformationConfig,
     ModelTrainerConfig,
-    ModelEvaluationConfig
+    ModelEvaluationConfig,
+    ModelPusherConfig
     )
 
 
@@ -15,7 +16,9 @@ from sensor.entity.artifact_entity import (
     DataIngestionArtifact,
     DataValidationArtifact,
     DataTransformationArtifact,
-    ModelTrainerArtifact
+    ModelTrainerArtifact,
+    ModelEvaluationArtifact,
+    ModelPusherArtifact
     )
 
 from sensor.component.data_ingestion import DataIngestion
@@ -23,6 +26,7 @@ from sensor.component.data_validation import DataValidation
 from sensor.component.data_transformation import DataTransformation
 from sensor.component.model_trainer import ModelTrainer
 from sensor.component.model_evaluation import ModelEvaluation
+from sensor.component.model_pusher import ModelPusher
 
 import os, sys
 
@@ -102,12 +106,17 @@ class TrainPipeline:
         
         except  Exception as e:
             raise  SensorException(e,sys)
-    
-    def start_model_pusher(self):
+
+    def start_model_pusher(self,model_eval_artifact:ModelEvaluationArtifact):
         try:
-            pass
-        except Exception as e:
-            raise SensorException(e, sys)
+            model_pusher_config = ModelPusherConfig(training_pipeline_config=self.training_pipeline_config)
+            model_pusher = ModelPusher(model_pusher_config, model_eval_artifact)
+            model_pusher_artifact = model_pusher.initiate_model_pusher()
+            
+            return model_pusher_artifact
+        
+        except  Exception as e:
+            raise  SensorException(e,sys)
 
     def run_pipeline(self):
         try:
@@ -119,6 +128,11 @@ class TrainPipeline:
                 data_validation_artifact=data_validation_artifact,
                 model_trainer_artifact=model_trainer_artifact
                 )
+            
+            if not model_evaluation_artifact.is_model_accepted:
+                raise Exception("Trained model is not better than the best model")
+            
+            model_pusher_artifact = self.start_model_pusher(model_eval_artifact=model_evaluation_artifact)
             
         except Exception as e:
             raise SensorException(e, sys)

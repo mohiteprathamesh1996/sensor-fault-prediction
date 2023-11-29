@@ -47,3 +47,8 @@ MODEL_EVALUATION_DIR_NAME: str = "model_evaluation"
 MODEL_EVALUATION_CHANGED_THRESHOLD_SCORE: float = 0.02
 MODEL_EVALUATION_REPORT_NAME = "report.yaml"
 
+
+# Define constants for model pushing
+MODEL_PUSHER_DIR_NAME = "model_pusher"
+MODEL_PUSHER_SAVED_MODEL_DIR = SAVED_MODEL_DIR
+

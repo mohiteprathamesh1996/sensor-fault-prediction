@@ -39,7 +39,10 @@ class SensorData:
 
 
     def export_collection_as_dataframe(
-        self, collection_name: str, database_name: Optional[str] = None) -> pd.DataFrame:
+            self, 
+            collection_name: str, 
+            database_name: Optional[str] = None
+            ) -> pd.DataFrame:
         try:
             """
             export entire collectin as dataframe:

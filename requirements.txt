@@ -1,6 +1,7 @@
 pymongo[srv]==4.2.0
 pandas
 certifi
+awscli
 datetime
 scikit-learn
 seaborn

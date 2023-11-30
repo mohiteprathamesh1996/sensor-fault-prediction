@@ -1,13 +1,17 @@
 from sensor.configuration.mongo_db_connection import MongoDBClient
 from sensor.exception import SensorException
 import os,sys
+import numpy as np
+from sensor.entity.artifact_entity import DataValidationArtifact
 from sensor.logger import logging
 from sensor.pipeline import training_pipeline
 from sensor.pipeline.training_pipeline import TrainPipeline
 import pandas as pd
 from sensor.utils.main_utils import read_yaml_file
 from sensor.constant.training_pipeline import SAVED_MODEL_DIR
-from fastapi import FastAPI
+from sensor.constant.training_pipeline import TARGET_COLUMN
+from sensor.constant import training_pipeline
+from fastapi import FastAPI, UploadFile, File
 from sensor.constant.application import APP_HOST, APP_PORT
 from starlette.responses import RedirectResponse
 from uvicorn import run as app_run
@@ -15,6 +19,11 @@ from fastapi.responses import Response
 from sensor.ml.model.estimator import ModelResolver,TargetValueMapping
 from sensor.utils.main_utils import load_object
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import io
+
+directory = training_pipeline.ARTIFACT_DIR
+
 
 
 
@@ -46,28 +55,34 @@ async def train_route():
     except Exception as e:
         return Response(f"Error Occurred! {e}")
 
+class InputData(BaseModel):
+    features: dict
+
 @app.get("/predict")
 async def predict_route():
     try:
         #get data from user csv file
         #conver csv file to dataframe
 
-        df=pd.read_csv("aps_failure_training_set1.csv")
+        df = pd.read_csv("aps_failure_training_set1.csv")
         model_resolver = ModelResolver(model_dir=SAVED_MODEL_DIR)
+
         if not model_resolver.is_model_exists():
             return Response("Model is not available")
         
         best_model_path = model_resolver.get_best_model_path()
         model = load_object(file_path=best_model_path)
-        y_pred = model.predict(df)
-        df['predicted_column'] = y_pred
-        df['predicted_column'].replace(TargetValueMapping().reverse_mapping(),inplace=True)
-        
+
+        y_pred = model.predict(x = df.drop(columns="class").replace('na', np.nan))
+
         #decide how to return file to user.
-        return df
+        return y_pred
         
     except Exception as e:
         raise Response(f"Error Occured! {e}")
+
+
+
 
 def main():
     try:

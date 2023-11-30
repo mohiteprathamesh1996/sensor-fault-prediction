@@ -8,8 +8,7 @@ from sensor.pipeline import training_pipeline
 from sensor.pipeline.training_pipeline import TrainPipeline
 import pandas as pd
 from sensor.utils.main_utils import read_yaml_file
-from sensor.constant.training_pipeline import SAVED_MODEL_DIR
-from sensor.constant.training_pipeline import TARGET_COLUMN
+from sensor.constant.training_pipeline import *
 from sensor.constant import training_pipeline
 from fastapi import FastAPI, UploadFile, File
 from sensor.constant.application import APP_HOST, APP_PORT
@@ -58,30 +57,48 @@ async def train_route():
 class InputData(BaseModel):
     features: dict
 
-@app.get("/predict")
-async def predict_route():
+@app.post("/predict")
+async def predict_route(file: UploadFile = File(...)):
     try:
-        #get data from user csv file
-        #conver csv file to dataframe
+        contents = await file.read()  # Read the contents of the uploaded file
+        df = pd.read_csv(io.BytesIO(contents))  # Use io.BytesIO to read bytes as CSV
+        # Process the DataFrame (e.g., perform operations, save to disk, etc.)
+        directory = training_pipeline.ARTIFACT_DIR
+        files_with_timestamps = [
+            (
+                filename, 
+                os.path.getctime(os.path.join(directory, filename))
+                )
+                for filename in os.listdir(directory)
+                ]
+        
+        latest_file = max(files_with_timestamps, key=lambda x: x[1])[0] if files_with_timestamps else None
 
-        df = pd.read_csv("aps_failure_training_set1.csv")
+        latest_file_path_csv = os.path.join(
+            directory, 
+            latest_file, 
+            DATA_INGESTION_DIR_NAME,
+            DATA_INGESTION_INGESTED_DIR, 
+            TRAIN_FILE_NAME
+            )
+        
+        cols_to_include = list(pd.read_csv(latest_file_path_csv).columns)
+
         model_resolver = ModelResolver(model_dir=SAVED_MODEL_DIR)
-
+        
         if not model_resolver.is_model_exists():
             return Response("Model is not available")
-        
+            
         best_model_path = model_resolver.get_best_model_path()
         model = load_object(file_path=best_model_path)
-
-        y_pred = model.predict(x = df.drop(columns="class").replace('na', np.nan))
-
-        #decide how to return file to user.
-        return y_pred
+        y_pred = model.predict(
+            x = df[cols_to_include].drop(columns=TARGET_COLUMN).replace('na', np.nan)
+            )
         
     except Exception as e:
-        raise Response(f"Error Occured! {e}")
-
-
+        return Response(f"Error Occurred! {e}")
+    
+    return {"predictions" : y_pred.tolist()}
 
 
 def main():
@@ -96,3 +113,4 @@ def main():
 if __name__=="__main__":
     main()
     app_run(app, host=APP_HOST, port=APP_PORT)
+    

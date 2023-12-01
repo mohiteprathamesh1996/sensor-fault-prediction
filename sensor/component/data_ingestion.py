@@ -5,6 +5,10 @@ from sensor.entity.artifact_entity import DataIngestionArtifact
 from sklearn.model_selection import train_test_split
 import os,sys
 from pandas import DataFrame
+import pandas as pd
+import pymongo
+import certifi
+ca = certifi.where()
 from sensor.data_access.sensor_data import SensorData
 from sensor.utils.main_utils import read_yaml_file
 from sensor.constant.training_pipeline import SCHEMA_FILE_PATH
@@ -25,7 +29,16 @@ class DataIngestion:
         try:
             logging.info("Exporting data from mongodb to feature store")
             sensor_data = SensorData()
-            dataframe = sensor_data.export_collection_as_dataframe(collection_name=self.data_ingestion_config.collection_name)
+            client = pymongo.MongoClient(
+                "mongodb+srv://prathameshmohite96:Psm%4020696@clusterpm.jycq9ph.mongodb.net/?retryWrites=true&w=majority", 
+                tlsCAFile = ca
+                )
+
+#            dataframe = sensor_data.export_collection_as_dataframe(
+#                collection_name=self.data_ingestion_config.collection_name, 
+#                database_name = "ineuron"
+#                )
+            dataframe = pd.DataFrame(list(client["ineuron"]["car"].find()))
             feature_store_file_path = self.data_ingestion_config.feature_store_file_path            
 
             #creating folder

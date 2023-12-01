@@ -12,7 +12,7 @@ class MongoDBClient:
             if MongoDBClient.client is None:
                 # MongoDBClient.client = pymongo.MongoClient(MONGODB_URL, tlsCAFile = ca)
                 MongoDBClient.client = pymongo.MongoClient(
-                    "mongodb+srv://prathameshmohite96:Psm%4020696@clusterpm.jycq9ph.mongodb.net/?retryWrites=true&w=majority", 
+                    "mongodb+srv://prathameshmohite96:Psm%4020696@clusterpm.jycq9ph.mongodb.net/", 
                     tlsCAFile = ca
                     )
 

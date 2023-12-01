@@ -11,7 +11,10 @@ response = ssm.get_parameter(
   WithDecryption=True
 )
 
-pymongvar = response["Parameter"]["Value"]
+#pymongvar = response["Parameter"]["Value"]
+
+pymongvar = "mongodb+srv://prathameshmohite96:Psm%4020696@clusterpm.jycq9ph.mongodb.net/?retryWrites=true&w=majority"
+
 os.environ['MONGODB_URL'] = pymongvar
 os.environ['MONGO_DB_URL'] = pymongvar
 

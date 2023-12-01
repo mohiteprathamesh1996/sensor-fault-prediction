@@ -1,4 +1,4 @@
-
+from sklearn.model_selection import GridSearchCV
 from sensor.utils.main_utils import load_numpy_array_data
 from sensor.exception import SensorException
 from sensor.logger import logging
@@ -21,12 +21,21 @@ class ModelTrainer:
         except Exception as e:
             raise SensorException(e,sys)
 
- #   def perform_hyper_paramter_tunig(self):...
-    
-
+ 
     def train_model(self,x_train,y_train):
         try:
-            xgb_clf = XGBClassifier()
+            xgb_clf = GridSearchCV(
+                estimator=XGBClassifier(), 
+                param_grid={
+                    'n_estimators': [100, 200, 300],
+                    'max_depth': [3, 4, 5],
+                    'learning_rate': [0.1, 0.01, 0.001]
+                    }, 
+                cv=3, 
+                scoring='accuracy', 
+                verbose=2
+                )
+
             xgb_clf.fit(x_train,y_train)
             return xgb_clf
         except Exception as e:

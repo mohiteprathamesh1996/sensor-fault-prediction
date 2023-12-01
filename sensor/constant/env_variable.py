@@ -11,10 +11,12 @@ response = ssm.get_parameter(
   WithDecryption=True
 )
 
-MONGODB_URL = response["Parameter"]["Value"]
-MONGO_DB_URL = response["Parameter"]["Value"]
-# MONGODB_URL = os.getenv('MONGODB_URL')
-# MONGO_DB_URL = os.getenv('MONGO_DB_URL')
+pymongvar = response["Parameter"]["Value"]
+os.environ['MONGODB_URL'] = pymongvar
+os.environ['MONGO_DB_URL'] = pymongvar
+
+MONGODB_URL = os.getenv('MONGODB_URL')
+MONGO_DB_URL = os.getenv('MONGO_DB_URL')
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION")

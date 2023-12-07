@@ -101,6 +101,7 @@ async def predict_route(file: UploadFile = File(...)):
     return {"predictions": y_pred.tolist()}
 
 
+
 def main():
     try:
         training_pipeline = TrainPipeline()

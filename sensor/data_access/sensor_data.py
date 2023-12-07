@@ -27,6 +27,7 @@ class SensorData:
             data_frame=pd.read_csv(file_path)
             data_frame.reset_index(drop=True, inplace=True)
             records = list(json.loads(data_frame.T.to_json()).values())
+            
             if database_name is None:
                 collection = self.mongo_client.database[collection_name]
             else:

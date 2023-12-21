@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 # Load env
 # load_dotenv()
+
 MONGODB_URL = os.getenv('MONGODB_URL')
 MONGO_DB_URL = os.getenv('MONGO_DB_URL')
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
